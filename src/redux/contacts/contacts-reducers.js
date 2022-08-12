@@ -1,25 +1,42 @@
 import { createReducer } from '@reduxjs/toolkit';
 import { combineReducers } from 'redux';
-import { addContact, deleteContact, filterContact } from './contscts-actions';
+import { addContact, deleteItem, fetchContacts } from './contacts-operations';
+import { filterContact } from './contscts-actions';
 
-const initContacts = [
-  { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-  { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-  { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-  { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-];
-
-const itemReducer = createReducer(initContacts, {
-  [addContact]: (state, action) => [...state, action.payload],
-  [deleteContact]: (state, { payload }) =>
-    state.filter(({ id }) => id !== payload),
+const itemReducer = createReducer([], {
+  [fetchContacts.fulfilled]: (_, { payload }) => payload,
+  [addContact.fulfilled]: (_, { payload }) => payload,
+  [deleteItem.fulfilled]: (_, { payload }) => payload,
 });
 
 const filterReducer = createReducer('', {
-  [filterContact.type]: (_, { payload }) => payload,
+  [filterContact]: (_, { payload }) => payload,
+});
+
+const errorReducer = createReducer('', {
+  [fetchContacts.rejected]: (_, { payload }) => payload,
+  [addContact.rejected]: (_, { payload }) => payload,
+  [deleteItem.rejected]: (_, { payload }) => payload,
+  [fetchContacts.pending]: () => '',
+  [addContact.pending]: () => '',
+  [deleteItem.pending]: () => '',
+});
+
+const loadingReducer = createReducer(false, {
+  [fetchContacts.pending]: () => true,
+  [fetchContacts.fulfilled]: () => false,
+  [fetchContacts.rejected]: () => false,
+  [addContact.pending]: () => true,
+  [addContact.fulfilled]: () => false,
+  [addContact.rejected]: () => false,
+  [deleteItem.pending]: () => true,
+  [deleteItem.fulfilled]: () => false,
+  [deleteItem.rejected]: () => false,
 });
 
 export const contactsReducer = combineReducers({
   items: itemReducer,
   filter: filterReducer,
+  loading: loadingReducer,
+  error: errorReducer,
 });
